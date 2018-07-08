@@ -117,7 +117,7 @@ widthsizediff = comparedimensions(totalmonitorwidth, origimg.width)
 heightsizediff = comparedimensions(totalmonitorheight, origimg.height)
 
 if willscaleimage:
-    # todo: scale image instead of just adding black to the top/sides
+    # todo: scale image instead of just adding black to the top/sides a
     print('Creating scaled image...')
     newimg = origimg.resize(totalmonitorsize)  # scales the image to the size of the monitors, but keeps aspect ratio if smaller than monitors
 
