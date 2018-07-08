@@ -1,0 +1,94 @@
+
+for monitor in monitors:
+    splitimg = Image.new('RGB', monitor)
+
+    # x y w h
+    box = (currentwidthoffset, 0, monitor[0], monitor[1])
+    imageslist.append(newimg.crop(box))
+    currentwidthoffset = monitor[0] + 1
+
+currentimgnumber = 0
+for image in imageslist:
+    image.save("testimg_aftersplit_" + str(currentimgnumber) + ".png")
+
+
+
+
+
+
+
+
+#splitimg = Image.new('RGB', monitor0)
+
+# x y w h
+# x = along
+# y = up
+
+# pic 1
+box = (0, 0, monitor0[0], monitor0[1])
+splitimg = newimg.crop(box)
+splitimg.save("testimg_aftersplit_0.png")
+
+# pic 2
+box = (1920, 0, monitor0[0] + monitor1[0], 1080) 
+splitimgnew = newimg.crop(box)
+splitimgnew.save("testimg_aftersplit_1.png")
+
+# pic 3
+#box = (3840, 0, monitor2[0], monitor2[1])
+#splitimg = newimg.crop(box)
+#splitimg.save("testimg_aftersplit_2.png")
+
+
+
+
+
+
+kdecommand = """
+dbus-send --session --dest=org.kde.plasmashell --type=method_call /PlasmaShell org.kde.PlasmaShell.evaluateScript 'string:
+var Desktops = desktops();                                                                                                                       
+for (i=0;i<Desktops.length;i++) {
+        d = Desktops[i];
+        d.wallpaperPlugin = "org.kde.image";
+        d.currentConfigGroup = Array("Wallpaper",
+                                    "org.kde.image",
+                                    "General");
+        d.writeConfig("Image", "file:///PATH/TO/IMAGE.png");
+}'
+
+"""
+
+
+
+
+
+
+    dbus-send --session --dest=org.kde.plasmashell --type=method_call /PlasmaShell org.kde.PlasmaShell.evaluateScript 'string:
+    d = desktop[2];
+    d.wallpaperPlugin = "org.kde.image";
+    d.currentConfigGroup = Array("Wallpaper",
+                                "org.kde.image",
+                                "General");
+    d.writeConfig("Image", "file://testimage_aftersplit_2.png");
+
+
+
+
+for monitor in monitors:
+    newkdecommand = """
+    dbus-send --session --dest=org.kde.plasmashell --type=method_call /PlasmaShell org.kde.PlasmaShell.evaluateScript 'string:
+    d = desktop[""" + str(kdemonitorloop) + """];
+    d.wallpaperPlugin = "org.kde.image";
+    d.currentConfigGroup = Array("Wallpaper",
+                                "org.kde.image",
+                                "General");
+    d.writeConfig("Image", "file://""" + "testimage_aftersplit_" + str(kdemonitorloop) + """.png");
+"""
+    os.system(newkdecommand)
+    kdemonitorloop += 1
+
+
+
+
+
+
