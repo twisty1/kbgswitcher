@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 from PIL import Image
 from pathlib import Path
 import os, sys, random, time, argparse, configparser
@@ -48,6 +48,25 @@ givenimagefile = ''
 
 print("KBGSwitcher")
 
+
+# Check if config file exists
+# Set up variables from config file
+if not os.path.exists(configpath):
+    os.makedirs(configpath)
+
+if not os.path.isfile(configfile):
+    print("kbgswitcher: error: " + configfile + " was not found but was created.")
+    print("Please see the man page for details on how to modify it and configure KBGswitcher")
+    newconfigfile = open(configfile, "w+")
+    newconfigtext = "[LIST]\nmonitors = 1\n\n[MONITORS]\nmonitor0 = 1920x1080\n\n[CONTAINMENTS]\nmonitor0 = 1\n\n[GENERAL]\nscaleimage = 0"
+    newconfigfile.writelines(newconfigtext)
+    sys.exit()
+else:
+    config.read(configfile)
+
+# todo: check if blank.png exists, create it progmatically if not
+
+
 # parse command line arg (should be image to split)
 parser = argparse.ArgumentParser(description='Splits multimonitor wallpapers and sets them on your KDE desktops.')
 arggroup = parser.add_mutually_exclusive_group()
@@ -60,7 +79,7 @@ args = parser.parse_args()
 if args.r:
     print('Trying to select random image...')
     if not os.path.exists(args.r):
-        print("Error: " + args.r + " directory not found.")
+        print("kbgswitcher: error: " + args.r + " directory not found.")
         sys.exit()
     else:
         givenimagefile = args.r + random.choice(os.listdir(args.r))
@@ -69,22 +88,14 @@ if args.r:
 elif args.i:
     print('Trying to select open specific image...')
     if not os.path.isfile(args.i):
-        print("Error: " + args.i + " image not found.")
+        print("kbgswitcher: error: " + args.i + " image not found.")
         sys.exit()
     else:
         givenimagefile = args.i
-
-
-# Set up variables from config file
-if not os.path.exists(configpath):
-    os.makedirs(configpath)
-
-if not os.path.isfile(configfile):
-    print ("Error: " + configfile + " not found.")
-    sys.exit()
 else:
-    print("Reading config")
-    config.read(configfile)
+    print ("usage: kbgswitcher.py [-h] [-r /path/to/images/ | -i image.png|.jpg]")
+    print("kbgswitcher: error: no arguments given. Please see -h for help.")
+    sys.exit()
 
 for entry in config['MONITORS']:
     print(config.get('MONITORS', entry))
@@ -114,7 +125,6 @@ widthsizediff = comparedimensions(totalmonitorwidth, origimg.width)
 heightsizediff = comparedimensions(totalmonitorheight, origimg.height)
 
 if scaleimage == 0:
-    # todo: scale image instead of just adding black to the top/sides a
     print('Creating scaled image...')
     newimg = origimg.resize(totalmonitorsize)  # scales the image to the size of the monitors, but keeps aspect ratio if smaller than monitors
 
@@ -160,10 +170,6 @@ for image in imageslist:
     image.save(configpath + '/tempimg_' + str(currentimgnumber) + '.png')
     currentimgnumber += 1;
 
-
-
-
-
 # save images in correct spot & refresh KDE desktop
 # config file is: .config/plasma-org.kde.plasma.desktop-appletsrc
 
@@ -184,13 +190,8 @@ qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '
 
 saveloc = "file:///" + configpath + "/tempimg_"
 
-# blanking out the current wallpaper so KDE will pick up our changes | containments = []
+# blanking out the current wallpaper so KDE will pick up our changes
 print ('Blanking wallpaper...')
-
-#os.system(newkdecommand.format(save_location=configpath + "/blank.png", desktop_number="1"))
-#os.system(newkdecommand.format(save_location=configpath + "/blank.png", desktop_number="11"))
-#os.system(newkdecommand.format(save_location=configpath + "/blank.png", desktop_number="12"))
-
 for cont, value in config['CONTAINMENTS'].items():
     print ("Blanking containment: " + value)
     os.system(newkdecommand.format(save_location=configpath + "/blank.png", desktop_number= value))
