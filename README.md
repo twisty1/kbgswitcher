@@ -20,9 +20,10 @@ This section contains a single option called 'monitors'. Set this to the number 
 ### [MONITORS]
 This section contains the dimensions of each monitor that you have. For example:
 
-monitor0 = 1920x1080
+```monitor0 = 1920x1080
 monitor1 = 1920x1080
 monitor2 = 1920x1080
+```
 
 This usually goes left to right but that all depends on the next section.
 
@@ -31,11 +32,12 @@ This section is a bit of a pain to configure and may take a bit of trial and err
 
 For example with my 3 monitors I have:
 
- [CONTAINMENTS]
+ ```[CONTAINMENTS]
  monitor0 = 11
  monitor1 = 1
  monitor2 = 12
-
+```
+ 
 As you will notice, my left monitor is containment 11, my middle monitor is containment 1 and my right monitor is containment 12. Although this appears neat for me, others have reported all kinds of random numbers that identify each monitor.
 
 
