@@ -3,6 +3,7 @@ from PIL import Image
 from pathlib import Path
 import os, sys, random, time, argparse, configparser
 
+
 # functions
 
 def splitmonitor(splitstring):
@@ -33,12 +34,7 @@ def selectrandomfile():
 
 # variables
 debug = True
-
-# todo: need to do something else here and add to ini file
-willchopimage = False
-willfixedsizeimage = False
-willscaleimage = True
-
+scaleimage = 0;
 configpath = os.path.dirname(str(Path.home()) + "/.config/kbgswitcher/")
 configfile = configpath + "/kbswitcher.ini"
 config = configparser.ConfigParser()
@@ -79,8 +75,6 @@ elif args.i:
         givenimagefile = args.i
 
 
-
-
 # Set up variables from config file
 if not os.path.exists(configpath):
     os.makedirs(configpath)
@@ -101,6 +95,9 @@ for monitor in monitors:
     if int(monitor[1]) > totalmonitorheight:
         totalmonitorheight = int(monitor[1])
 
+# scaleimage - 0=scale, 1 = chop, 2=fixed
+scaleimage = int(config.get('GENERAL', 'scaleimage'))
+
 totalmonitorsize = (totalmonitorwidth, totalmonitorheight)
 
 #open our given or random image
@@ -116,7 +113,7 @@ widthsizediff = comparedimensions(totalmonitorwidth, origimg.width)
 # figure out the difference between the image height and monitor height / 2
 heightsizediff = comparedimensions(totalmonitorheight, origimg.height)
 
-if willscaleimage:
+if scaleimage == 0:
     # todo: scale image instead of just adding black to the top/sides a
     print('Creating scaled image...')
     newimg = origimg.resize(totalmonitorsize)  # scales the image to the size of the monitors, but keeps aspect ratio if smaller than monitors
@@ -124,12 +121,12 @@ if willscaleimage:
 elif widthsizediff < 0 or heightsizediff < 0:   # image height or width GREATER THAN monitor size
     print("image height or width greater than monitor/s")
 
-    if willchopimage:
+    if scaleimage == 1:
         print('Chopping image...')
         offsetcoord = (widthsizediff, heightsizediff)
         newimg.paste(origimg, offsetcoord)
 
-    elif willfixedsizeimage:
+    elif scaleimage == 2:
         print('Creating fixed size image...')
         newimg = origimg.resize(totalmonitorsize) # scales the image to the size of the monitors, but keeps aspect ratio if smaller than monitors
 
@@ -187,32 +184,30 @@ qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '
 
 saveloc = "file:///" + configpath + "/tempimg_"
 
-# blanking out the current wallpaper so KDE will pick up our changes
-# todo: it appears that the file names need to change or KDE will tell you to go fuck yourself
+# blanking out the current wallpaper so KDE will pick up our changes | containments = []
 print ('Blanking wallpaper...')
 
-os.system(newkdecommand.format(save_location=configpath + "/blank.png", desktop_number="1"))
-os.system(newkdecommand.format(save_location=configpath + "/blank.png", desktop_number="11"))
-os.system(newkdecommand.format(save_location=configpath + "/blank.png", desktop_number="12"))
+#os.system(newkdecommand.format(save_location=configpath + "/blank.png", desktop_number="1"))
+#os.system(newkdecommand.format(save_location=configpath + "/blank.png", desktop_number="11"))
+#os.system(newkdecommand.format(save_location=configpath + "/blank.png", desktop_number="12"))
 
-print ('Waiting 5 seconds for kde to catch up..')
-time.sleep(5)
+for cont, value in config['CONTAINMENTS'].items():
+    print ("Blanking containment: " + value)
+    os.system(newkdecommand.format(save_location=configpath + "/blank.png", desktop_number= value))
+
+
+
+print ('Waiting 1 second for kde to catch up..')
+time.sleep(1)
 
 print ('Setting wallpaper' )
 
-# note: the below desktop numbers are currently hard coded to what I have in the kde config file :(
 
-# first monitor
-os.system(newkdecommand.format(save_location=saveloc + "2.png", desktop_number="1"))
-
-
-# left monitor
-os.system(newkdecommand.format(save_location=saveloc + "1.png", desktop_number="11"))
-
-
-# right monitor
-os.system(newkdecommand.format(save_location=saveloc + "3.png", desktop_number="12"))
-
+wallpapercounter = 1
+for cont, value in config['CONTAINMENTS'].items():
+    print ("Setting containment: " + value)
+    os.system(newkdecommand.format(save_location=saveloc + str(wallpapercounter) + ".png", desktop_number= value))
+    wallpapercounter += 1
 
 print("Should have set wallpaper now.")
 
