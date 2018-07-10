@@ -37,6 +37,7 @@ debug = True
 scaleimage = 0;
 configpath = os.path.dirname(str(Path.home()) + "/.config/kbgswitcher/")
 configfile = configpath + "/kbswitcher.ini"
+blankimage = configpath + "/blank.png"
 config = configparser.ConfigParser()
 monitors = [] # list of monitor tuples
 totalmonitorwidth = 0
@@ -64,7 +65,11 @@ if not os.path.isfile(configfile):
 else:
     config.read(configfile)
 
-# todo: check if blank.png exists, create it progmatically if not
+# check if blank.png exists, create it progmatically if not
+if not os.path.isfile(blankimage):
+    print("creating blank image")
+    img = Image.new('RGB', (1920, 1080), color='black')
+    img.save(blankimage)
 
 
 # parse command line arg (should be image to split)
@@ -73,7 +78,6 @@ arggroup = parser.add_mutually_exclusive_group()
 arggroup.add_argument('-r', metavar='/path/to/images/', help='choose a random .png or .jpg from a directory')
 arggroup.add_argument('-i', metavar='image.png|.jpg', help='image file to set as the wallpaper')
 args = parser.parse_args()
-
 
 # Check arguments and set our new image up
 if args.r:
