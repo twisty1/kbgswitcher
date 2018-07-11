@@ -1,7 +1,11 @@
 # kbgswitcher
 Command line utility for switching multi-desktop wallpapers in KDE Plasma 5
 
+## Requirements
 
+ * Pillow (Python image library)
+ * Python 3.x 
+ 
 ## How to Use
 
 1. Run kbswitcher.py. This will set up the necessary directors and a config file under ~/.config/kbgswitcher/kbgswitcher.ini
@@ -32,7 +36,8 @@ This section is a bit of a pain to configure and may take a bit of trial and err
 
 For example with my 3 monitors I have:
 
- ```[CONTAINMENTS]
+ ```
+ [CONTAINMENTS]
  monitor0 = 11
  monitor1 = 1
  monitor2 = 12
